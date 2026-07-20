@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-import models
-import schemas
-from database import get_db
+from .. import schemas
+from ..database import get_db
+from ..services import student_service
 
 router = APIRouter()
 
@@ -11,15 +11,14 @@ router = APIRouter()
 
 @router.get("/", response_model=list[schemas.StudentResponse])
 def get_students(db: Session = Depends(get_db)):
-    students = db.query(models.Student).all()
-    return students
+    return student_service.get_all_students(db)
 
 
 # -------------------- GET STUDENT BY ID --------------------
 
 @router.get("/{student_id}", response_model=schemas.StudentResponse)
 def get_student(student_id: int, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == student_id).first()
+    student = student_service.get_student_by_id(student_id, db)
 
     if student is None:
         return {"message": "Student not found"}
@@ -31,35 +30,17 @@ def get_student(student_id: int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=schemas.StudentResponse)
 def add_student(student: schemas.StudentCreate, db: Session = Depends(get_db)):
-    new_student = models.Student(
-        id=student.id,
-        name=student.name,
-        department=student.department,
-        semester=student.semester
-    )
-
-    db.add(new_student)
-    db.commit()
-    db.refresh(new_student)
-
-    return new_student
+    return student_service.create_student(student, db)
 
 
 # -------------------- UPDATE STUDENT --------------------
 
 @router.put("/{student_id}", response_model=schemas.StudentResponse)
 def update_student(student_id: int, updated_student: schemas.StudentCreate, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == student_id).first()
+    student = student_service.update_student(student_id, updated_student, db)
 
     if student is None:
         return {"message": "Student not found"}
-
-    student.name = updated_student.name
-    student.department = updated_student.department
-    student.semester = updated_student.semester
-
-    db.commit()
-    db.refresh(student)
 
     return student
 
@@ -68,12 +49,9 @@ def update_student(student_id: int, updated_student: schemas.StudentCreate, db: 
 
 @router.delete("/{student_id}")
 def delete_student(student_id: int, db: Session = Depends(get_db)):
-    student = db.query(models.Student).filter(models.Student.id == student_id).first()
+    deleted = student_service.delete_student(student_id, db)
 
-    if student is None:
+    if not deleted:
         return {"message": "Student not found"}
-
-    db.delete(student)
-    db.commit()
 
     return {"message": "Student deleted successfully"}
