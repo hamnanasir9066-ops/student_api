@@ -3,102 +3,101 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 
-from app.schemas.student import (
-    StudentCreate,
-    StudentUpdate,
-    StudentResponse
+from app.schemas.subject import (
+    SubjectCreate,
+    SubjectUpdate,
+    SubjectResponse
 )
 
-from app.services import student_service
-
+from app.services import subject_service
 
 router = APIRouter()
 
 
 # ==========================================
-# Get All Students
+# Get All Subjects
 # ==========================================
 
 @router.get(
     "/",
-    response_model=list[StudentResponse]
+    response_model=list[SubjectResponse]
 )
-def get_all_students(
+def get_all_subjects(
     db: Session = Depends(get_db)
 ):
-    return student_service.get_all_students(db)
+    return subject_service.get_all_subjects(db)
 
 
 # ==========================================
-# Get Student By ID
+# Get Subject By ID
 # ==========================================
 
 @router.get(
-    "/{student_id}",
-    response_model=StudentResponse
+    "/{subject_id}",
+    response_model=SubjectResponse
 )
-def get_student(
-    student_id: int,
+def get_subject(
+    subject_id: int,
     db: Session = Depends(get_db)
 ):
-    return student_service.get_student_by_id(
-        student_id,
+    return subject_service.get_subject_by_id(
+        subject_id,
         db
     )
 
 
 # ==========================================
-# Create Student
+# Create Subject
 # ==========================================
 
 @router.post(
     "/",
-    response_model=StudentResponse,
+    response_model=SubjectResponse,
     status_code=status.HTTP_201_CREATED
 )
-def create_student(
-    student: StudentCreate,
+def create_subject(
+    subject: SubjectCreate,
     db: Session = Depends(get_db)
 ):
-    return student_service.create_student(
-        student,
+    return subject_service.create_subject(
+        subject,
         db
     )
 
 
 # ==========================================
-# Update Student
+# Update Subject
 # ==========================================
 
 @router.put(
-    "/{student_id}",
-    response_model=StudentResponse
+    "/{subject_id}",
+    response_model=SubjectResponse
 )
-def update_student(
-    student_id: int,
-    student: StudentUpdate,
+def update_subject(
+    subject_id: int,
+    subject: SubjectUpdate,
     db: Session = Depends(get_db)
 ):
-    return student_service.update_student(
-        student_id,
-        student,
+    return subject_service.update_subject(
+        subject_id,
+        subject,
         db
     )
 
 
 # ==========================================
-# Delete Student
+# Delete Subject
 # ==========================================
 
 @router.delete(
-    "/{student_id}",
+    "/{subject_id}",
     status_code=status.HTTP_200_OK
 )
-def delete_student(
-    student_id: int,
+def delete_subject(
+    subject_id: int,
     db: Session = Depends(get_db)
 ):
-    return student_service.delete_student(
-        student_id,
+    return subject_service.delete_subject(
+        subject_id,
         db
     )

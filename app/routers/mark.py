@@ -3,102 +3,101 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 
-from app.schemas.student import (
-    StudentCreate,
-    StudentUpdate,
-    StudentResponse
+from app.schemas.mark import (
+    MarkCreate,
+    MarkUpdate,
+    MarkResponse
 )
 
-from app.services import student_service
-
+from app.services import mark_service
 
 router = APIRouter()
 
 
 # ==========================================
-# Get All Students
+# Get All Marks
 # ==========================================
 
 @router.get(
     "/",
-    response_model=list[StudentResponse]
+    response_model=list[MarkResponse]
 )
-def get_all_students(
+def get_all_marks(
     db: Session = Depends(get_db)
 ):
-    return student_service.get_all_students(db)
+    return mark_service.get_all_marks(db)
 
 
 # ==========================================
-# Get Student By ID
+# Get Mark By ID
 # ==========================================
 
 @router.get(
-    "/{student_id}",
-    response_model=StudentResponse
+    "/{mark_id}",
+    response_model=MarkResponse
 )
-def get_student(
-    student_id: int,
+def get_mark(
+    mark_id: int,
     db: Session = Depends(get_db)
 ):
-    return student_service.get_student_by_id(
-        student_id,
+    return mark_service.get_mark_by_id(
+        mark_id,
         db
     )
 
 
 # ==========================================
-# Create Student
+# Create Mark
 # ==========================================
 
 @router.post(
     "/",
-    response_model=StudentResponse,
+    response_model=MarkResponse,
     status_code=status.HTTP_201_CREATED
 )
-def create_student(
-    student: StudentCreate,
+def create_mark(
+    mark: MarkCreate,
     db: Session = Depends(get_db)
 ):
-    return student_service.create_student(
-        student,
+    return mark_service.create_mark(
+        mark,
         db
     )
 
 
 # ==========================================
-# Update Student
+# Update Mark
 # ==========================================
 
 @router.put(
-    "/{student_id}",
-    response_model=StudentResponse
+    "/{mark_id}",
+    response_model=MarkResponse
 )
-def update_student(
-    student_id: int,
-    student: StudentUpdate,
+def update_mark(
+    mark_id: int,
+    mark: MarkUpdate,
     db: Session = Depends(get_db)
 ):
-    return student_service.update_student(
-        student_id,
-        student,
+    return mark_service.update_mark(
+        mark_id,
+        mark,
         db
     )
 
 
 # ==========================================
-# Delete Student
+# Delete Mark
 # ==========================================
 
 @router.delete(
-    "/{student_id}",
+    "/{mark_id}",
     status_code=status.HTTP_200_OK
 )
-def delete_student(
-    student_id: int,
+def delete_mark(
+    mark_id: int,
     db: Session = Depends(get_db)
 ):
-    return student_service.delete_student(
-        student_id,
+    return mark_service.delete_mark(
+        mark_id,
         db
     )

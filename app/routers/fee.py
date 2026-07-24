@@ -3,102 +3,101 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 
-from app.schemas.student import (
-    StudentCreate,
-    StudentUpdate,
-    StudentResponse
+from app.schemas.fee import (
+    FeeCreate,
+    FeeUpdate,
+    FeeResponse
 )
 
-from app.services import student_service
-
+from app.services import fee_service
 
 router = APIRouter()
 
 
 # ==========================================
-# Get All Students
+# Get All Fees
 # ==========================================
 
 @router.get(
     "/",
-    response_model=list[StudentResponse]
+    response_model=list[FeeResponse]
 )
-def get_all_students(
+def get_all_fees(
     db: Session = Depends(get_db)
 ):
-    return student_service.get_all_students(db)
+    return fee_service.get_all_fees(db)
 
 
 # ==========================================
-# Get Student By ID
+# Get Fee By ID
 # ==========================================
 
 @router.get(
-    "/{student_id}",
-    response_model=StudentResponse
+    "/{fee_id}",
+    response_model=FeeResponse
 )
-def get_student(
-    student_id: int,
+def get_fee(
+    fee_id: int,
     db: Session = Depends(get_db)
 ):
-    return student_service.get_student_by_id(
-        student_id,
+    return fee_service.get_fee_by_id(
+        fee_id,
         db
     )
 
 
 # ==========================================
-# Create Student
+# Create Fee
 # ==========================================
 
 @router.post(
     "/",
-    response_model=StudentResponse,
+    response_model=FeeResponse,
     status_code=status.HTTP_201_CREATED
 )
-def create_student(
-    student: StudentCreate,
+def create_fee(
+    fee: FeeCreate,
     db: Session = Depends(get_db)
 ):
-    return student_service.create_student(
-        student,
+    return fee_service.create_fee(
+        fee,
         db
     )
 
 
 # ==========================================
-# Update Student
+# Update Fee
 # ==========================================
 
 @router.put(
-    "/{student_id}",
-    response_model=StudentResponse
+    "/{fee_id}",
+    response_model=FeeResponse
 )
-def update_student(
-    student_id: int,
-    student: StudentUpdate,
+def update_fee(
+    fee_id: int,
+    fee: FeeUpdate,
     db: Session = Depends(get_db)
 ):
-    return student_service.update_student(
-        student_id,
-        student,
+    return fee_service.update_fee(
+        fee_id,
+        fee,
         db
     )
 
 
 # ==========================================
-# Delete Student
+# Delete Fee
 # ==========================================
 
 @router.delete(
-    "/{student_id}",
+    "/{fee_id}",
     status_code=status.HTTP_200_OK
 )
-def delete_student(
-    student_id: int,
+def delete_fee(
+    fee_id: int,
     db: Session = Depends(get_db)
 ):
-    return student_service.delete_student(
-        student_id,
+    return fee_service.delete_fee(
+        fee_id,
         db
     )
