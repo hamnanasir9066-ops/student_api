@@ -1,5 +1,7 @@
+# pyrefly: ignore [missing-import]
 from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
+# pyrefly: ignore [missing-import]
+from sqlalchemy.orm import relationship, synonym
 
 from app.database import Base
 
@@ -15,6 +17,7 @@ class Subject(Base):
         unique=True,
         nullable=False
     )
+    code = synonym("subject_code")
 
     name = Column(
         String(100),

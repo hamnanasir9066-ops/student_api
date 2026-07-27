@@ -1,5 +1,6 @@
 from typing import Optional
 
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict, Field
 from app.enums.grade import Grade
 
@@ -93,6 +94,6 @@ class MarkResponse(MarkBase):
 
     grade: str
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    class Config:
+        orm_mode = True
+        from_attributes = True

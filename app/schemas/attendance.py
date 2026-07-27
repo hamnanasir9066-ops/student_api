@@ -1,6 +1,7 @@
-from datetime import date
+from datetime import date as date_type
 from typing import Optional
 
+# pyrefly: ignore [missing-import]
 from pydantic import BaseModel, ConfigDict
 from app.enums.attendance_status import AttendanceStatus
 
@@ -11,7 +12,7 @@ from app.enums.attendance_status import AttendanceStatus
 
 class AttendanceBase(BaseModel):
 
-    date: date
+    date: date_type
 
     status: AttendanceStatus
 
@@ -33,7 +34,7 @@ class AttendanceCreate(AttendanceBase):
 
 class AttendanceUpdate(BaseModel):
 
-    date: Optional[date] = None
+    date: Optional[date_type] = None
 
     status: Optional[AttendanceStatus] = None
 
@@ -50,4 +51,6 @@ class AttendanceResponse(AttendanceBase):
 
     subject_id: int
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        orm_mode = True
+        from_attributes = True

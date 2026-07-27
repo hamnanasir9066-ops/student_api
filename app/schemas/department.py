@@ -66,6 +66,6 @@ class DepartmentResponse(DepartmentBase):
 
     id: int
 
-    model_config = ConfigDict(
-        from_attributes=True
-    )
+    class Config:
+        orm_mode = True
+        from_attributes = True
