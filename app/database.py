@@ -1,13 +1,11 @@
+# pyrefly: ignore [missing-import]
 from sqlalchemy import create_engine
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import sessionmaker, declarative_base
-MYSQL_USER="root"
-MYSQL_PASSWORD="12345"
-MYSQL_HOST="localhost"
-MYSQL_PORT="3306"
-MYSQL_DATABASE="fastapi_db"
 
+from app.config import settings
 
-DATABASE_URL = f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{MYSQL_PORT}/{MYSQL_DATABASE}"
+DATABASE_URL = f"mysql+pymysql://{settings.MYSQL_USER}:{settings.MYSQL_PASSWORD}@{settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DATABASE}"
 
 engine = create_engine(DATABASE_URL)
 

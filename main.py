@@ -5,6 +5,7 @@ from app.database import Base, engine
 
 # Import Routers
 from app.routers import (
+    auth,
     user,
     students,
     department,
@@ -34,6 +35,12 @@ app = FastAPI(
 # ==========================================
 # Include Routers
 # ==========================================
+
+app.include_router(
+    auth.router,
+    prefix="/auth",
+    tags=["Authentication"]
+)
 
 app.include_router(
     user.router,

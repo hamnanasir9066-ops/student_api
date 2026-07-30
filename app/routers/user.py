@@ -2,20 +2,37 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-
+from app.models.user import User
 from app.schemas.user import (
     UserCreate,
     UserUpdate,
     UserResponse
 )
-
 from app.services import user_service
+from app.utils.oauth2 import get_current_user
 
 router = APIRouter()
 
 
 # ==========================================
-# Get All Users
+# Get Current Authenticated User Profile
+# ==========================================
+
+@router.get(
+    "/me",
+    response_model=UserResponse
+)
+def get_me(
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Returns the profile of the currently logged-in user.
+    """
+    return current_user
+
+
+# ==========================================
+# Get All Users (Protected Route)
 # ==========================================
 
 @router.get(
@@ -23,7 +40,8 @@ router = APIRouter()
     response_model=list[UserResponse]
 )
 def get_all_users(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     return user_service.get_all_users(db)
 

@@ -1,8 +1,11 @@
+# pyrefly: ignore [missing-import]
 from fastapi import HTTPException
+# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
+from app.utils.security import hash_password
 
 
 # ==========================================
@@ -91,8 +94,8 @@ def create_user(user: UserCreate, db: Session):
 
         email=user.email,
 
-        # Phase 4 me password hash hoga
-        hashed_password=user.password,
+        # Securely hash user password before database storage
+        hashed_password=hash_password(user.password),
 
         role=user.role,
 
@@ -158,8 +161,7 @@ def update_user(
 
     if password is not None:
 
-        # JWT phase me hash karenge
-        user.hashed_password = password
+        user.hashed_password = hash_password(password)
 
     if updated_user.role is not None:
 
