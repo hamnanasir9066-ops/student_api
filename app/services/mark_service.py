@@ -192,3 +192,14 @@ def delete_mark(mark_id: int, db: Session):
     return {
         "message": "Mark deleted successfully"
     }
+
+
+# ==========================================
+# Get Marks By Student ID (Self-Service)
+# ==========================================
+
+def get_marks_by_student_id(student_id: int, db: Session):
+    """
+    Returns all mark records belonging to a specific student.
+    """
+    return db.query(Mark).filter(Mark.student_id == student_id).all()

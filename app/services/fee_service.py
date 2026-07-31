@@ -147,3 +147,14 @@ def delete_fee(
     return {
         "message": "Fee deleted successfully"
     }
+
+
+# ==========================================
+# Get Fees By Student ID (Self-Service)
+# ==========================================
+
+def get_fees_by_student_id(student_id: int, db: Session):
+    """
+    Returns all fee records belonging to a specific student.
+    """
+    return db.query(Fee).filter(Fee.student_id == student_id).all()

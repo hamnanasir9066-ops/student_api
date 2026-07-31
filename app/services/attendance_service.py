@@ -147,3 +147,14 @@ def delete_attendance(
     return {
         "message": "Attendance deleted successfully"
     }
+
+
+# ==========================================
+# Get Attendance By Student ID (Self-Service)
+# ==========================================
+
+def get_attendance_by_student_id(student_id: int, db: Session):
+    """
+    Returns all attendance records belonging to a specific student.
+    """
+    return db.query(Attendance).filter(Attendance.student_id == student_id).all()

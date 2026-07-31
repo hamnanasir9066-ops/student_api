@@ -59,7 +59,18 @@ class UserUpdate(BaseModel):
     is_active: Optional[bool] = None
 
 
+class UserPasswordUpdate(BaseModel):
+
+    new_password: str = Field(
+        ...,
+        min_length=8,
+        max_length=100,
+        description="The new password for self-service update"
+    )
+
+
 class UserResponse(UserBase):
+
 
     id: int
 

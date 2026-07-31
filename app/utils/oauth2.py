@@ -71,3 +71,13 @@ class RoleChecker:
 
         return current_user
 
+
+def require_roles(*allowed_roles: UserRole) -> RoleChecker:
+    """
+    Convenience helper function to instantiate RoleChecker dependency.
+    Example usage in routers:
+        current_user: User = Depends(require_roles(UserRole.ADMIN, UserRole.TEACHER))
+    """
+    return RoleChecker(list(allowed_roles))
+
+

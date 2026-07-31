@@ -201,3 +201,23 @@ def delete_user(
     return {
         "message": "User deleted successfully"
     }
+
+
+# ==========================================
+# Change User Password (Self-Service)
+# ==========================================
+
+def change_user_password(
+    user_id: int,
+    new_password: str,
+    db: Session
+):
+    """
+    Updates the password for a specific user ID after hashing it securely.
+    Used for user self-service password updates.
+    """
+    user = get_user_by_id(user_id, db)
+    user.hashed_password = hash_password(new_password)
+    db.commit()
+    db.refresh(user)
+    return {"message": "Password updated successfully"}

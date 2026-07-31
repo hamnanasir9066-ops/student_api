@@ -102,3 +102,15 @@ def delete_enrollment(enrollment_id: int, db: Session):
     return {
         "message": "Enrollment deleted successfully"
     }
+
+
+# ==========================================
+# Get Enrollments By Student ID (Self-Service)
+# ==========================================
+
+def get_enrollments_by_student_id(student_id: int, db: Session):
+    """
+    Returns all subject enrollment records belonging to a specific student.
+    """
+    return db.query(StudentSubject).filter(StudentSubject.student_id == student_id).all()
+

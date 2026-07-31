@@ -217,3 +217,21 @@ def delete_student(student_id: int, db: Session):
     return {
         "message": "Student deleted successfully"
     }
+
+
+# ==========================================
+# Get Student By User ID (Self-Service)
+# ==========================================
+
+def get_student_by_user_id(user_id: int, db: Session):
+    """
+    Retrieves the Student profile associated with a specific User ID.
+    Raises HTTP 404 if no student profile exists for the user.
+    """
+    student = db.query(Student).filter(Student.user_id == user_id).first()
+    if student is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Student profile not found for this user account"
+        )
+    return student
