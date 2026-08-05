@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.student import Student
 from app.models.department import Department
+from app.models.user import User
 from app.schemas.student import StudentCreate, StudentUpdate
 
 
@@ -16,8 +17,6 @@ def ensure_student_columns(db: Session):
     column_definitions = {
         "user_id": "INT",
         "department_id": "INT",
-        "department": "VARCHAR(100)",
-        "name": "VARCHAR(100)",
         "roll_number": "VARCHAR(30)",
         "first_name": "VARCHAR(100)",
         "last_name": "VARCHAR(100)",
@@ -37,6 +36,12 @@ def ensure_student_columns(db: Session):
                 text(f"ALTER TABLE students ADD COLUMN {column_name} {definition}")
             )
 
+    if "name" in existing_columns:
+        db.execute(text("ALTER TABLE students DROP COLUMN name"))
+
+    if "department" in existing_columns:
+        db.execute(text("ALTER TABLE students DROP COLUMN department"))
+
     db.commit()
 
 
@@ -47,10 +52,10 @@ def ensure_student_columns(db: Session):
 def get_all_students(db: Session):
     return (
         db.query(Student)
+        .join(User, User.id == Student.user_id)
         .filter(
             Student.first_name.isnot(None),
             Student.last_name.isnot(None),
-            Student.user_id.isnot(None),
             Student.department_id.isnot(None),
             Student.roll_number.isnot(None)
         )
@@ -105,9 +110,6 @@ def create_student(student: StudentCreate, db: Session):
             detail="Department not found"
         )
 
-    name = f"{student.first_name} {student.last_name}".strip()
-    department_name = department.name
-
     new_student = Student(
         user_id=student.user_id,
         department_id=student.department_id,
@@ -119,9 +121,7 @@ def create_student(student: StudentCreate, db: Session):
         date_of_birth=student.date_of_birth,
         semester=student.semester,
         cgpa=student.cgpa,
-        address=student.address,
-        name=name,
-        department=department_name
+        address=student.address
     )
 
     db.add(new_student)
@@ -174,6 +174,28 @@ def update_student(
 
     if updated_student.address is not None:
         student.address = updated_student.address
+
+    if updated_student.user_id is not None:
+
+        user_exists = db.query(User).filter(User.id == updated_student.user_id).first()
+        if user_exists is None:
+            raise HTTPException(
+                status_code=404,
+                detail="User not found"
+            )
+
+        existing_student = db.query(Student).filter(
+            Student.user_id == updated_student.user_id,
+            Student.id != student_id
+        ).first()
+
+        if existing_student is not None:
+            raise HTTPException(
+                status_code=400,
+                detail="This user is already assigned to another student"
+            )
+
+        student.user_id = updated_student.user_id
 
     if updated_student.department_id is not None:
 
@@ -234,4 +256,4 @@ def get_student_by_user_id(user_id: int, db: Session):
             status_code=404,
             detail="Student profile not found for this user account"
         )
-    return student
+    return student

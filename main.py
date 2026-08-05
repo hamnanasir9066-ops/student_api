@@ -2,6 +2,7 @@
 from fastapi import FastAPI
 
 from app.database import Base, engine
+from app.utils.seed_admin import create_default_admin
 
 # Import Routers
 from app.routers import (
@@ -21,6 +22,7 @@ from app.routers import (
 # ==========================================
 
 Base.metadata.create_all(bind=engine)
+create_default_admin()
 
 # ==========================================
 # Create FastAPI App

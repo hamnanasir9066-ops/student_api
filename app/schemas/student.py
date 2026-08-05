@@ -51,6 +51,8 @@ class StudentUpdate(BaseModel):
 
     last_name: Optional[str] = Field(default=None, min_length=2, max_length=100)
 
+    user_id: Optional[int] = None
+
     phone: Optional[str] = Field(default=None, max_length=20)
 
     gender: Optional[str] = None

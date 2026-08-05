@@ -1,10 +1,14 @@
-# pyrefly: ignore [missing-import]
 from fastapi import HTTPException
-# pyrefly: ignore [missing-import]
 from sqlalchemy.orm import Session
 
 from app.models.user import User
+from app.models.student import Student
+from app.models.department import Department
+
 from app.schemas.user import UserCreate, UserUpdate
+
+from app.enums.user_role import UserRole
+
 from app.utils.security import hash_password
 
 
@@ -13,7 +17,6 @@ from app.utils.security import hash_password
 # ==========================================
 
 def get_all_users(db: Session):
-
     return db.query(User).all()
 
 
@@ -37,17 +40,6 @@ def get_user_by_id(user_id: int, db: Session):
 
 
 # ==========================================
-# Get User By Email
-# ==========================================
-
-def get_user_by_email(email: str, db: Session):
-
-    return db.query(User).filter(
-        User.email == email
-    ).first()
-
-
-# ==========================================
 # Get User By Username
 # ==========================================
 
@@ -59,51 +51,105 @@ def get_user_by_username(username: str, db: Session):
 
 
 # ==========================================
+# Get User By Email
+# ==========================================
+
+def get_user_by_email(email: str, db: Session):
+
+    return db.query(User).filter(
+        User.email == email
+    ).first()
+
+
+# ==========================================
 # Create User
 # ==========================================
 
 def create_user(user: UserCreate, db: Session):
 
     # Check username
-    existing_username = get_user_by_username(
-        user.username,
-        db
-    )
-
-    if existing_username:
+    if get_user_by_username(user.username, db):
         raise HTTPException(
             status_code=400,
             detail="Username already exists"
         )
 
     # Check email
-    existing_email = get_user_by_email(
-        user.email,
-        db
-    )
-
-    if existing_email:
+    if get_user_by_email(user.email, db):
         raise HTTPException(
             status_code=400,
             detail="Email already exists"
         )
 
+    # Validate Student Data
+    if user.role == UserRole.STUDENT:
+
+        required_fields = [
+            user.first_name,
+            user.last_name,
+            user.roll_number,
+            user.department_id,
+            user.semester
+        ]
+
+        if any(field is None for field in required_fields):
+            raise HTTPException(
+                status_code=400,
+                detail="Student information is required."
+            )
+
+        department = db.query(Department).filter(
+            Department.id == user.department_id
+        ).first()
+
+        if department is None:
+            raise HTTPException(
+                status_code=404,
+                detail="Department not found"
+            )
+
+        existing_roll = db.query(Student).filter(
+            Student.roll_number == user.roll_number
+        ).first()
+
+        if existing_roll:
+            raise HTTPException(
+                status_code=400,
+                detail="Roll number already exists"
+            )
+
+    # Create User
     new_user = User(
-
         username=user.username,
-
         email=user.email,
-
-        # Securely hash user password before database storage
         hashed_password=hash_password(user.password),
-
         role=user.role,
-
         is_active=True
-
     )
 
     db.add(new_user)
+
+    # Generate ID
+    db.flush()
+
+    # Automatically Create Student Profile
+    if new_user.role == UserRole.STUDENT:
+
+        student = Student(
+            user_id=new_user.id,
+            department_id=user.department_id,
+            roll_number=user.roll_number,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            phone=user.phone,
+            gender=user.gender,
+            date_of_birth=user.date_of_birth,
+            semester=user.semester,
+            cgpa=user.cgpa if user.cgpa else 0.0,
+            address=user.address
+        )
+
+        db.add(student)
 
     db.commit()
 
@@ -122,10 +168,7 @@ def update_user(
     db: Session
 ):
 
-    user = get_user_by_id(
-        user_id,
-        db
-    )
+    user = get_user_by_id(user_id, db)
 
     if updated_user.username is not None:
 
@@ -157,22 +200,16 @@ def update_user(
 
         user.email = updated_user.email
 
-    password = getattr(updated_user, "password", None)
-
-    if password is not None:
-
-        user.hashed_password = hash_password(password)
+    if updated_user.password is not None:
+        user.hashed_password = hash_password(updated_user.password)
 
     if updated_user.role is not None:
-
         user.role = updated_user.role
 
     if updated_user.is_active is not None:
-
         user.is_active = updated_user.is_active
 
     db.commit()
-
     db.refresh(user)
 
     return user
@@ -187,14 +224,9 @@ def delete_user(
     db: Session
 ):
 
-    get_user_by_id(
-        user_id,
-        db
-    )
+    user = get_user_by_id(user_id, db)
 
-    db.query(User).filter(
-        User.id == user_id
-    ).delete(synchronize_session=False)
+    db.delete(user)
 
     db.commit()
 
@@ -204,7 +236,7 @@ def delete_user(
 
 
 # ==========================================
-# Change User Password (Self-Service)
+# Change Password
 # ==========================================
 
 def change_user_password(
@@ -212,12 +244,15 @@ def change_user_password(
     new_password: str,
     db: Session
 ):
-    """
-    Updates the password for a specific user ID after hashing it securely.
-    Used for user self-service password updates.
-    """
+
     user = get_user_by_id(user_id, db)
+
     user.hashed_password = hash_password(new_password)
+
     db.commit()
+
     db.refresh(user)
-    return {"message": "Password updated successfully"}
+
+    return {
+        "message": "Password updated successfully"
+    }
