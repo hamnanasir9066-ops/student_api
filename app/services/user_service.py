@@ -1,5 +1,7 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
+
+from app.tasks.email_tasks import send_welcome_email
 
 from app.models.user import User
 from app.models.student import Student
@@ -65,7 +67,11 @@ def get_user_by_email(email: str, db: Session):
 # Create User
 # ==========================================
 
-def create_user(user: UserCreate, db: Session):
+def create_user(
+    user: UserCreate,
+    db: Session,
+    background_tasks: BackgroundTasks
+):
 
     # Check username
     if get_user_by_username(user.username, db):
@@ -154,8 +160,16 @@ def create_user(user: UserCreate, db: Session):
     db.commit()
 
     db.refresh(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    background_tasks.add_task(
+    send_welcome_email,
+    new_user.email
+)
 
     return new_user
+
 
 
 # ==========================================
@@ -252,6 +266,7 @@ def change_user_password(
     db.commit()
 
     db.refresh(user)
+   
 
     return {
         "message": "Password updated successfully"

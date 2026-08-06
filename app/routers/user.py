@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status,BackgroundTasks
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -114,18 +114,15 @@ def get_user(
 )
 def create_user(
     user: UserCreate,
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user: User = Depends(allow_admin)
 ):
-    """
-    Creates a new user account with specified role (Admin, Teacher, Student). Admin access only.
-    """
     return user_service.create_user(
-        user,
-        db
+        user=user,
+        db=db,
+        background_tasks=background_tasks
     )
-
-
 # ==========================================
 # Update User (Admin Only)
 # ==========================================

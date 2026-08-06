@@ -6,6 +6,7 @@ class Grade(str, Enum):
     A_MINUS = "A-"
     B_PLUS = "B+"
     B = "B"
+    C_PLUS = "C+"
     C = "C"
     D = "D"
     F = "F"
